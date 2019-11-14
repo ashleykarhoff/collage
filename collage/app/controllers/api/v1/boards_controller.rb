@@ -11,6 +11,7 @@ class Api::V1::BoardsController < ApplicationController
 
     def create
         new_board = Board.create(board_params)
+        render json: new_board
     end
 
     def update

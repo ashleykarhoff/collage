@@ -71,6 +71,25 @@ document.addEventListener('DOMContentLoaded', () => {
         user.boards.forEach(board => boardDropdown(board.id, board.title))
     }
 
+    async function addBoard(title, currentUser){
+        let userId = currentUser.id
+        const response = await fetch(`http://localhost:3000/api/v1/boards`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'accepts': 'application/json'
+            },
+            body: JSON.stringify({
+                'user_id': `${userId}`,
+                'title': `${title}`,
+                'likes': 0
+            })
+        })
+        .then(resp => resp.json())
+        .then(board => appendBoard(board))
+        .catch(console.error)
+    }
+
     function boardDropdown(id, title){
         // console.log(id, title)
         let boardDropdown = document.getElementById('boardDropdown');
@@ -239,6 +258,11 @@ document.addEventListener('DOMContentLoaded', () => {
         boardComments.appendChild(commentSpace);
     };
 
+    function newBoard(){
+        let boardTitle = document.getElementById('new-board-title').value;
+        addBoard(boardTitle, currentUser);
+    }
+
     // Constructs board index page (including form for new boards)
     function boardPage() {
         let newBoardForm = document.createElement('div');
@@ -253,7 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <button id="new-board-submit" type="submit" class="btn btn-primary">Create</button>
                 </div>
             </form>`;
-        
+    
         gridContainer.appendChild(newBoardForm);
 
         if (hasBoards()) {
@@ -288,9 +312,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function addImage(e){
-        if(e.preventDefault){
+        if (e.preventDefault) {
             e.preventDefault();
-        }else{
+        } else {
             e.returnValue = false;
         }
 
@@ -404,6 +428,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
             case 'add':
                 addImage(e);
+                break;
+
+            case 'logo':
+                emptyContainer();
+                getImages();
+                break;
+            
+            case 'new-board-submit':
+                if (e.preventDefault) {
+                    e.preventDefault();
+                } else {
+                    e.returnValue = false;
+                }
+
+                newBoard();
                 break;
         
             default:
