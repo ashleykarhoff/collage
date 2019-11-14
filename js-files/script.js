@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
         data.results.forEach(image => appendImage(image));
     };
 
-    async function getBoard(boardId,){
+    async function getBoard(boardId){
         const response = await fetch(`http://localhost:3000/api/v1/boards/${boardId}`);
         const board = await response.json();
         appendBoardImages(board);
@@ -69,6 +69,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const response = await fetch(`http://localhost:3000/api/v1/users/${userId}`);
         const user = await response.json();
         user.boards.forEach(board => boardDropdown(board.id, board.title))
+    }
+
+    async function getAllBoards(){
+        let userId = currentUser.id
+        const response = await fetch(`http://localhost:3000/api/v1/users/${userId}`);
+        const user = await response.json();
+        user.boards.forEach(board => appendBoard(board));
     }
 
     async function addBoard(title, currentUser){
@@ -85,9 +92,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 'likes': 0
             })
         })
-        .then(resp => resp.json())
+        .then(response => response.json())
         .then(board => appendBoard(board))
         .catch(console.error)
+    }
+
+    async function deleteBoard(e) {
+        let boardId = e.target.dataset.id;
+
+        await fetch(`http://localhost:3000/api/v1/boards/${boardId}`, {
+            method: 'DELETE',
+        })
+        emptyContainer();
+        boardPage()
     }
 
     function boardDropdown(id, title){
@@ -98,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
         option.dataset.id = id;
 
         boardDropdown.appendChild(option);
-    }
+    };
 
     // Show page for an image
     function showImage(imageDiv){
@@ -141,9 +158,9 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Return all of user's board objects
-    function myBoards(){
-        return currentUser.boards;
-    }
+    // function myBoards(){
+    //     return currentUser.boards;
+    // }
 
     // Returns true if a user has boards
     function hasBoards(){
@@ -231,6 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <button id="like" type="button" class="btn btn-primary">
                 Likes <span data-id=${board.id} class="badge badge-light">${board.likes}</span>
             </button>
+            <button id="delete-board" data-id=${board.id} type="button" class="btn btn-danger">Delete</button>
             <div class="board-images"></div>`
 
         gridContainer.appendChild(boardContainer);
@@ -280,9 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
         gridContainer.appendChild(newBoardForm);
 
-        if (hasBoards()) {
-            myBoards().forEach(board => appendBoard(board));
-        };
+        getAllBoards();
 
         let submitButton = document.querySelector('#new-comment-submit')
         submitButton.addEventListener('click', function(e){
@@ -443,6 +459,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 newBoard();
+                break;
+
+            case 'delete-board':
+                deleteBoard(e);
                 break;
         
             default:

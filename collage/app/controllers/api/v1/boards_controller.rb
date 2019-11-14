@@ -19,6 +19,11 @@ class Api::V1::BoardsController < ApplicationController
         board.update(board_params)
     end
 
+    def destroy
+        Board.destroy(params[:id])
+        render json: "Board successfully deleted"
+    end
+
     private
 
     def board_params
