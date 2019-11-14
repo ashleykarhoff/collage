@@ -11,7 +11,11 @@ class Api::V1::ImagesController < ApplicationController
 
     def create
         image = Image.create(image_params)
-        render json: "Image successfully added"
+        render json: {message: "Image successfully added", image: image}
+    end
+
+    def destroy
+        Image.destroy(params[:id])
     end
 
     private

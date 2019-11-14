@@ -4,10 +4,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // DOM Elements
     const wrapper = document.querySelector('div.wrapper');
+    const header = document.querySelector('div.headers');
     const gridContainer = document.querySelector('div.grid');
     const searchInput = document.querySelector('input#search-input')
     const body = document.querySelector('body');
-    const likeButton = document.getElementById('like');
     
     // If current user isn't set, show logIn page
     if (currentUser) {
@@ -107,8 +107,15 @@ document.addEventListener('DOMContentLoaded', () => {
         boardPage()
     }
 
+    async function removeImage(imageId) {
+        await fetch(`http://localhost:3000/api/v1/images/${imageId}`, {
+            method: 'DELETE'
+        })
+        emptyContainer();
+        boardPage()
+    }
+
     function boardDropdown(id, title){
-        // console.log(id, title)
         let boardDropdown = document.getElementById('boardDropdown');
         let option = document.createElement('option');
         option.innerText = title;
@@ -131,10 +138,37 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
             <input type="hidden" id="title" name="title" value=${imageDiv.dataset.title}>
             <input type="hidden" id="description" name="description" value=${imageDiv.dataset.description}>
-            <button id="add" type="submit" class="btn btn-primary">Add</button>`
+            <div class="form-group">
+                <button id="add" type="submit" class="btn btn-primary">Add</button>
+            </div>`
         
         gridContainer.appendChild(imgBoardForm);
         getBoards();
+    }
+
+    function showBoardImage(e){
+        console.log(e.target)
+        
+        let imageContainer = e.target.parentNode;
+        gridContainer.appendChild(imageContainer);
+
+        let buttonContainer = document.createElement('div');
+        buttonContainer.innerHTML = '<button id="delete-image" data-id="" type="button" class="btn btn-danger">Remove Image</button>'
+        gridContainer.appendChild(buttonContainer);
+
+        // let imgBoardForm = document.createElement('form');
+        // imgBoardForm.className = 'add-image-form'
+        // imgBoardForm.innerHTML = 
+        //     `<div class="form-group">
+        //         <label for="board_id">Your Boards:</label>
+        //         <select class="form-control" id="boardDropdown"></select>
+        //     </div>
+        //     <input type="hidden" id="title" name="title" value=${imageDiv.dataset.title}>
+        //     <input type="hidden" id="description" name="description" value=${imageDiv.dataset.description}>
+        //     <button id="add" type="submit" class="btn btn-primary">Add</button>`
+        
+        // gridContainer.appendChild(imgBoardForm);
+        // getBoards();
     }
 
     // Append Images to Page
@@ -156,16 +190,6 @@ document.addEventListener('DOMContentLoaded', () => {
         imageContainer.appendChild(img);
         gridContainer.appendChild(imageContainer);
     };
-
-    // Return all of user's board objects
-    // function myBoards(){
-    //     return currentUser.boards;
-    // }
-
-    // Returns true if a user has boards
-    function hasBoards(){
-        return myBoards().length > 0;
-    }
 
     // Like a board
     function addLike(e){
@@ -248,20 +272,23 @@ document.addEventListener('DOMContentLoaded', () => {
             <button id="like" type="button" class="btn btn-primary">
                 Likes <span data-id=${board.id} class="badge badge-light">${board.likes}</span>
             </button>
-            <button id="delete-board" data-id=${board.id} type="button" class="btn btn-danger">Delete</button>
-            <div class="board-images"></div>`
-
-        gridContainer.appendChild(boardContainer);
+            <button id="delete-board" data-id=${board.id} type="button" class="btn btn-danger">Delete Board</button>
+            <div class="board-images" data-id=${board.id}></div>`
+        
+        header.appendChild(boardContainer);
 
         board.images.forEach(function(image){
+            console.log(image)
             let imageContainer = document.createElement('div');
             imageContainer.className = 'grid-item'
             imageContainer.dataset.title = image.title;
             imageContainer.dataset.description = image.description;
+            imageContainer.dataset.imageid = image.id;
 
             let img = document.createElement('img');
             img.src = image.link;
-            img.className = 'board-image'
+            img.className = 'board-image';
+            img.dataset.id = board['id'];
 
             imageContainer.appendChild(img);
             gridContainer.appendChild(imageContainer);
@@ -284,20 +311,24 @@ document.addEventListener('DOMContentLoaded', () => {
     // Constructs board index page (including form for new boards)
     function boardPage() {
         let newBoardForm = document.createElement('div');
+        newBoardForm.className = 'board-form-container'
         newBoardForm.innerHTML = 
-            `<form>
-                <div class="form-group">
-                    <label for="formGroupExampleInput">Title:</label>
-                    <input type="text" class="form-control" id="new-board-title" placeholder="Board Title">
-                </div>
-                <div class="form-group">
-                    <input type="hidden" id="userId" name="user_id" value: ${currentUser}>
-                    <button id="new-board-submit" type="submit" class="btn btn-primary">Create</button>
-                </div>
-            </form>`;
-    
-        gridContainer.appendChild(newBoardForm);
+            `<div class="jumbotron" style="max-width: 850px;">
+                <h2 class="display-4">Create a board</h2>
+                <hr class="my-4">
+                <form>
+                    <div class="form-group">
+                        <label for="formGroupExampleInput">Title:</label>
+                        <input type="text" class="form-control" id="new-board-title" placeholder="Board Title">
+                    </div>
+                    <div class="form-group">
+                        <input type="hidden" id="userId" name="user_id" value: ${currentUser}>
+                        <button id="new-board-submit" type="submit" class="btn btn-primary btn-lg">Create Board</button>
+                    </div>
+                </form>
+            </div>`;
 
+        header.prepend(newBoardForm);
         getAllBoards();
 
         let submitButton = document.querySelector('#new-comment-submit')
@@ -318,13 +349,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    function showMessage(message){
-        let messageDiv = document.createElement('div');
-        messageDiv.className = 'alert alert-success';
-        messageDiv.role = 'alert';
-        messageDiv.innerText = message;
+    function showMessage(messageObj){
+        console.log(messageObj)
+        // {"message":"Image successfully added","image":{"id":43,"board_id":11,"title":"white","description":"","link":"https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?ixlib=rb-1.2.1\u0026q=80\u0026fm=jpg\u0026crop=entropy\u0026cs=tinysrgb\u0026w=400\u0026fit=max\u0026ixid=eyJhcHBfaWQiOjEwMDM0MX0","created_at":"2019-11-14T18:39:29.881Z","updated_at":"2019-11-14T18:39:29.881Z"}}
+        // let messageDiv = document.createElement('div');
+        // messageDiv.className = 'alert alert-success';
+        // messageDiv.role = 'alert';
+        // messageDiv.innerText = messageObj['message'];
 
-        wrapper.insertBefore(messageDiv, wrapper.firstChild);
+        // wrapper.insertBefore(messageDiv, wrapper.firstChild);
     }
 
     function addImage(e){
@@ -363,11 +396,20 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .then(resp => resp.text())
         .then(message => showMessage(message))
+        .then()
         .catch(console.error)
+    }
+
+    function deleteImage(e){
+        let button = e.target;
+        let imageId = button.parentElement.parentElement.firstElementChild.dataset.imageid;
+
+        removeImage(imageId);
     }
 
     // Empty the DOM
     function emptyContainer(){
+        header.innerHTML = "";
         gridContainer.innerHTML = "";
     }
 
@@ -408,6 +450,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 emptyContainer();
                 getBoard(boardId);
                 break;
+            
+             case 'board-image':
+                 emptyContainer();
+                 showBoardImage(e);
+                 break;
         
             default:
                 break;
@@ -463,6 +510,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             case 'delete-board':
                 deleteBoard(e);
+                break;
+
+            case 'delete-image':
+                deleteImage(e);
                 break;
         
             default:
