@@ -13,6 +13,7 @@ class Api::V1::CommentsController < ApplicationController
       comment = Comment.create(comments_params)
       logger.info("board id: #{comment.id}")
       logger.info("board content: #{comment.description}")
+      render json: comment
     end
 
     def destroy

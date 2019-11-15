@@ -286,16 +286,15 @@ document.addEventListener('DOMContentLoaded', () => {
         })
     };
 
-    function addLatestComment(obj) {
-        console.log(obj)
+    function addLatestComment(commentId, boardObj, e) {
         let commentSpace = document.createElement('p');
-        commentSpace.innerText = obj.description;
-        commentSpace.dataset.id = obj.id
+        commentSpace.innerText = boardObj.description;
+        commentSpace.dataset.id = commentId;
         let deleteButton = document.createElement('span');
         deleteButton.innerHTML =  '<span><img class="comment-delete-button" src="assets/delete.png" alt="delete-button"></span>';
 
         commentSpace.appendChild(deleteButton);
-        boardComments = document.querySelector('.board-comment');
+        let boardComments = e.target.parentElement.parentElement.nextSibling
         boardComments.appendChild(commentSpace);
 
     };
@@ -347,18 +346,20 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     function addComment(e){
-        let commentInput = document.querySelector('#new-comment').value;
+        let commentInput = e.target.parentElement.parentElement.firstElementChild.lastElementChild.value;
         let boardDiv = e.target.closest('.card');
         let boardId = boardDiv.dataset.id;
-        let obj = {board_id:boardId, description:commentInput};
+        let boardObj = {board_id:boardId, description:commentInput};
 
         fetch('http://localhost:3000/api/v1/comments', {
                  method: 'POST',
                  headers: {
                 'content-type': 'application/json'
                  },
-                 body: JSON.stringify(obj)
-             }).then(addLatestComment(obj))
+                 body: JSON.stringify(boardObj)
+             })
+             .then(resp => resp.json())
+            .then(comment => addLatestComment(comment.id, boardObj, e))
     }
     
 
