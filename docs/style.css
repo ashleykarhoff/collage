@@ -75,7 +75,17 @@ body{
     background-color: rgb(250, 233, 233);
 } 
 
+.new-board-form {
+    flex: 1;
+    background-color: rgb(250, 233, 233);
+    font-family: "Courier New";
+}
 
+#new-board-submit {
+    background-color: rgb(250, 233, 233);
+    border: 1px solid black;
+    color: black;
+}
 
 .form-group {
     justify-content: center;

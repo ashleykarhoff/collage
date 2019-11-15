@@ -217,12 +217,12 @@ document.addEventListener('DOMContentLoaded', () => {
         let boardComments = document.createElement('div')
         boardComments.className = 'board-comment';
         boardDiv.className = 'card';
-        boardDiv.style = 'width: 18rem;';
+        boardDiv.style = 'width: 25rem;';
         boardDiv.dataset.id = board['id'];
         boardDiv.innerHTML = 
             `<img src="${defaultImage}" class="card-img-top" alt="...">
             <div class="card-body">
-                <p class="card-text">${board['title']}</p>
+                <h4 class="card-text">${board['title']}</h4>
             </div>
             <form>
                 <div class="form-group" style="text-align:center">
@@ -309,8 +309,8 @@ document.addEventListener('DOMContentLoaded', () => {
         let newBoardForm = document.createElement('div');
         newBoardForm.className = 'board-form-container'
         newBoardForm.innerHTML = 
-            `<div class="jumbotron" style="max-width: 850px;">
-                <h2 class="display-4">Create a board</h2>
+            `<div class="jumbotron new-board-form" style="max-width: 850px;">
+                <h4 class="display-4">Create a board</h4>
                 <hr class="my-4">
                 <form>
                     <div class="form-group">
@@ -326,23 +326,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         header.prepend(newBoardForm);
         getAllBoards();
-
-        // let submitButton = document.querySelector('#new-comment-submit')
-        // submitButton.addEventListener('click', function(e){
-        //     e.preventDefault();
-        //     let commentInput = document.querySelector('#new-comment').value
-        //     let boardDiv = e.target.closest('.card')
-        //     let boardId = boardDiv.dataset.id;
-        //     let obj = {board_id:boardId, description:commentInput};
-                 
-        //     fetch('http://localhost:3000/api/v1/comments', {
-        //         method: 'POST',
-        //         headers: {
-        //         'content-type': 'application/json'
-        //         },
-        //         body: JSON.stringify(obj)
-        //     }).then(addLatestComment(obj))
-        // });
     };
 
     function addComment(e){
@@ -360,18 +343,6 @@ document.addEventListener('DOMContentLoaded', () => {
              })
              .then(resp => resp.json())
             .then(comment => addLatestComment(comment.id, boardObj, e))
-    }
-    
-
-    function showMessage(messageObj){
-        console.log(messageObj)
-        // {"message":"Image successfully added","image":{"id":43,"board_id":11,"title":"white","description":"","link":"https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?ixlib=rb-1.2.1\u0026q=80\u0026fm=jpg\u0026crop=entropy\u0026cs=tinysrgb\u0026w=400\u0026fit=max\u0026ixid=eyJhcHBfaWQiOjEwMDM0MX0","created_at":"2019-11-14T18:39:29.881Z","updated_at":"2019-11-14T18:39:29.881Z"}}
-        // let messageDiv = document.createElement('div');
-        // messageDiv.className = 'alert alert-success';
-        // messageDiv.role = 'alert';
-        // messageDiv.innerText = messageObj['message'];
-
-        // wrapper.insertBefore(messageDiv, wrapper.firstChild);
     }
 
     function addImage(e){
