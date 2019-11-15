@@ -155,20 +155,6 @@ document.addEventListener('DOMContentLoaded', () => {
         let buttonContainer = document.createElement('div');
         buttonContainer.innerHTML = '<button id="delete-image" data-id="" type="button" class="btn btn-danger">Remove Image</button>'
         gridContainer.appendChild(buttonContainer);
-
-        // let imgBoardForm = document.createElement('form');
-        // imgBoardForm.className = 'add-image-form'
-        // imgBoardForm.innerHTML = 
-        //     `<div class="form-group">
-        //         <label for="board_id">Your Boards:</label>
-        //         <select class="form-control" id="boardDropdown"></select>
-        //     </div>
-        //     <input type="hidden" id="title" name="title" value=${imageDiv.dataset.title}>
-        //     <input type="hidden" id="description" name="description" value=${imageDiv.dataset.description}>
-        //     <button id="add" type="submit" class="btn btn-primary">Add</button>`
-        
-        // gridContainer.appendChild(imgBoardForm);
-        // getBoards();
     }
 
     // Append Images to Page
@@ -258,7 +244,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function appendComments(board, boardComments){
         board.comments.forEach(comment => {
            let commentElem = document.createElement('p')
+           commentElem.dataset.id = comment.id;
+           let deleteButton = document.createElement('span');
+           deleteButton.innerHTML =  '<span><img class="comment-delete-button" src="assets/delete.png" alt="delete-button"></span>';
+           
            commentElem.innerText = comment.description;
+           commentElem.appendChild(deleteButton);
            boardComments.append(commentElem);
         })
     };
@@ -299,8 +290,14 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log(obj)
         let commentSpace = document.createElement('p');
         commentSpace.innerText = obj.description;
+        commentSpace.dataset.id = obj.id
+        let deleteButton = document.createElement('span');
+        deleteButton.innerHTML =  '<span><img class="comment-delete-button" src="assets/delete.png" alt="delete-button"></span>';
+
+        commentSpace.appendChild(deleteButton);
         boardComments = document.querySelector('.board-comment');
         boardComments.appendChild(commentSpace);
+
     };
 
     function newBoard(){
@@ -331,23 +328,39 @@ document.addEventListener('DOMContentLoaded', () => {
         header.prepend(newBoardForm);
         getAllBoards();
 
-        let submitButton = document.querySelector('#new-comment-submit')
-        submitButton.addEventListener('click', function(e){
-            e.preventDefault();
-            let commentInput = document.querySelector('#new-comment').value
-            let boardDiv = e.target.closest('.card')
-            let boardId = boardDiv.dataset.id;
-            let obj = {board_id:boardId, description:commentInput};
+        // let submitButton = document.querySelector('#new-comment-submit')
+        // submitButton.addEventListener('click', function(e){
+        //     e.preventDefault();
+        //     let commentInput = document.querySelector('#new-comment').value
+        //     let boardDiv = e.target.closest('.card')
+        //     let boardId = boardDiv.dataset.id;
+        //     let obj = {board_id:boardId, description:commentInput};
                  
-            fetch('http://localhost:3000/api/v1/comments', {
-                method: 'POST',
-                headers: {
-                'content-type': 'application/json'
-                },
-                body: JSON.stringify(obj)
-            }).then(addLatestComment(obj))
-        });
+        //     fetch('http://localhost:3000/api/v1/comments', {
+        //         method: 'POST',
+        //         headers: {
+        //         'content-type': 'application/json'
+        //         },
+        //         body: JSON.stringify(obj)
+        //     }).then(addLatestComment(obj))
+        // });
     };
+
+    function addComment(e){
+        let commentInput = document.querySelector('#new-comment').value;
+        let boardDiv = e.target.closest('.card');
+        let boardId = boardDiv.dataset.id;
+        let obj = {board_id:boardId, description:commentInput};
+
+        fetch('http://localhost:3000/api/v1/comments', {
+                 method: 'POST',
+                 headers: {
+                'content-type': 'application/json'
+                 },
+                 body: JSON.stringify(obj)
+             }).then(addLatestComment(obj))
+    }
+    
 
     function showMessage(messageObj){
         console.log(messageObj)
@@ -407,6 +420,17 @@ document.addEventListener('DOMContentLoaded', () => {
         removeImage(imageId);
     }
 
+    function deleteComment(e){
+        let commentElem = e.target.parentElement.parentElement.parentElement;
+        let commentId = e.target.parentElement.parentElement.parentElement.dataset.id;
+
+        commentElem.remove();
+
+        fetch(`http://localhost:3000/api/v1/comments/${commentId}`, {
+            method: 'DELETE'
+        });
+    }
+
     // Empty the DOM
     function emptyContainer(){
         header.innerHTML = "";
@@ -455,6 +479,10 @@ document.addEventListener('DOMContentLoaded', () => {
                  emptyContainer();
                  showBoardImage(e);
                  break;
+
+            case 'comment-delete-button':
+                deleteComment(e);
+                break;
         
             default:
                 break;
@@ -481,6 +509,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 break;
      
             case 'login':
+                if (e.preventDefault) {
+                    e.preventDefault();
+                } else {
+                    e.returnValue = false;
+                }
                 let username = document.querySelector('#username-login').value;
                 userData(username);
                 break;
@@ -514,6 +547,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
             case 'delete-image':
                 deleteImage(e);
+                break;
+
+            case 'new-comment-submit':
+                if (e.preventDefault) {
+                    e.preventDefault();
+                } else {
+                    e.returnValue = false;
+                }
+
+                addComment(e);
                 break;
         
             default:

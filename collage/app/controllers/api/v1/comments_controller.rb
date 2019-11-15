@@ -15,6 +15,10 @@ class Api::V1::CommentsController < ApplicationController
       logger.info("board content: #{comment.description}")
     end
 
+    def destroy
+        Comment.destroy(params[:id])
+    end
+
     private
 
     def comments_params
